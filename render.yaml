@@ -1,0 +1,20 @@
+# Render Blueprint: New → Blueprint → pick this repo.
+# Singapore is the closest Render region to the Supabase project in Tokyo.
+services:
+  - type: web
+    name: vanqueue
+    runtime: go
+    region: singapore
+    plan: free
+    buildCommand: go build -trimpath -ldflags "-s -w" -o app .
+    startCommand: ./app
+    healthCheckPath: /login
+    autoDeploy: true
+    envVars:
+      # Render asks for these when the Blueprint is created; they are never stored in git.
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false

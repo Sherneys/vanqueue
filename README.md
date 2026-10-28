@@ -51,6 +51,17 @@ go run .
 
 เปิด http://localhost:8080
 
+## Deploy (Render)
+
+ไฟล์ `render.yaml` ตั้งค่าไว้แล้ว (Go, ภูมิภาคสิงคโปร์, แผนฟรี)
+
+1. https://dashboard.render.com → **New** → **Blueprint** → เชื่อม GitHub แล้วเลือก repo `vanqueue`
+2. ใส่ค่า `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (ค่าเดียวกับใน `.env`) → **Apply**
+3. รอ build เสร็จ แล้วเปิด URL `https://vanqueue-xxxx.onrender.com`
+
+หลังจากนั้นทุกครั้งที่ push ขึ้น `main` Render จะ deploy ใหม่ให้เอง
+แผนฟรีจะหลับเมื่อไม่มีคนเข้า 15 นาที การเปิดครั้งแรกหลังหลับจะรอประมาณ 30–60 วินาที
+
 ## เทสต์
 
 ```bash
