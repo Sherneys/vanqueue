@@ -1,0 +1,62 @@
+{{define "content"}}{{$r := .R}}{{$d := .Data}}
+<form class="panel form" method="post" action="/logs">
+  <h2>เพิ่มบันทึกการวิ่ง</h2>
+  <div class="grid4">
+    <label>วันที่ *<input type="date" name="date" value="{{$d.Day.ISO}}" required></label>
+    <label class="span3">รหัสรถตู้ * <small class="muted">ใส่ได้หลายคัน คั่นด้วยช่องว่าง/จุลภาค/ขึ้นบรรทัดใหม่</small>
+      <input name="codes" list="vanCodes" required placeholder="B-001 B-002 B-003" autocomplete="off"></label>
+    <label>สถานะ<select name="status">{{range $d.Statuses}}<option>{{.}}</option>{{end}}</select></label>
+    <label>สถานที่ไป (ปลายทาง)<input name="destination"></label>
+    <label class="span2">หมายเหตุ<input name="note"></label>
+  </div>
+  <datalist id="vanCodes">{{range $r.Vans}}<option value="{{.Code}}">{{.Driver}} · {{.Plate}}</option>{{end}}</datalist>
+  <div class="actions"><button class="primary">เพิ่ม</button></div>
+</form>
+
+<div class="toolbar">
+  <form method="get" action="/logs" class="inline">
+    <label>ดูวันที่ <input type="date" name="date" value="{{if not $d.All}}{{$d.Day.ISO}}{{end}}" onchange="this.form.submit()"></label>
+    {{if $d.Problems}}<input type="hidden" name="problems" value="1">{{end}}
+  </form>
+  <a class="btn {{if $d.All}}on{{end}}" href="/logs?date=all{{if $d.Problems}}&problems=1{{end}}">ทุกวัน</a>
+  {{if $d.Problems}}
+    <a class="btn on" href="/logs?date={{$d.ViewParam}}">✕ เฉพาะแถวที่มีปัญหา</a>
+  {{else}}
+    <a class="btn" href="/logs?date={{$d.ViewParam}}&problems=1">เฉพาะแถวที่มีปัญหา ({{$r.ProblemRows}} ทั้งหมด)</a>
+  {{end}}
+  <span class="grow"></span>
+  <span class="muted">{{$d.Total}} แถว{{if not $d.All}} วันที่ {{$d.Day}}{{end}}</span>
+  <a class="btn" href="/export/logs.csv">ดาวน์โหลด CSV</a>
+</div>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>วันที่</th><th>รหัสรถตู้</th><th>ชื่อคนขับ (อัตโนมัติ)</th><th>สถานที่ไป</th><th>สถานะ</th><th>หมายเหตุ</th><th>ตรวจสอบ</th><th></th></tr></thead>
+<tbody>
+{{range $d.Rows}}
+<tr>
+  <td>{{.Date}}</td><td><b>{{.Code}}</b></td><td>{{.Driver}}</td><td>{{.Destination}}</td>
+  <td><span class="tag {{if eq .Status "วิ่งแล้ว"}}ok{{else}}warn{{end}}">{{.Status}}</span></td>
+  <td class="wrap">{{.Note}}</td>
+  <td>{{with .Check}}<span class="check">{{.}}</span>{{end}}</td>
+  <td class="row-actions">
+    <a href="/logs/{{.ID}}">แก้ไข</a>
+    <form method="post" action="/logs/{{.ID}}/delete" onsubmit="return confirm('ลบแถวนี้?')">
+      <input type="hidden" name="back" value="{{$.Path}}"><button class="link danger">ลบ</button>
+    </form>
+  </td>
+</tr>
+{{else}}
+<tr><td colspan="8" class="muted center">ยังไม่มีบันทึก</td></tr>
+{{end}}
+</tbody>
+</table>
+</div>
+{{if gt $d.Pages 1}}
+<div class="pager">
+  {{if gt $d.Page 1}}<a class="btn" href="/logs?date={{$d.ViewParam}}{{if $d.Problems}}&problems=1{{end}}&page={{$d.PrevPage}}">‹ ก่อนหน้า</a>{{end}}
+  <span>หน้า {{$d.Page}} / {{$d.Pages}}</span>
+  {{if lt $d.Page $d.Pages}}<a class="btn" href="/logs?date={{$d.ViewParam}}{{if $d.Problems}}&problems=1{{end}}&page={{$d.NextPage}}">ถัดไป ›</a>{{end}}
+</div>
+{{end}}
+{{end}}

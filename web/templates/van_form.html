@@ -1,0 +1,47 @@
+{{define "content"}}{{$v := .Data.Van}}
+<div class="split">
+<form class="panel form" method="post" action="{{if $v.ID}}/vans/{{$v.ID}}{{else}}/vans{{end}}">
+  <div class="grid2">
+    <label>รหัสรถตู้ *<input name="code" value="{{$v.Code}}" required placeholder="B-001"></label>
+    <label>ชื่อคนขับ *<input name="driver" value="{{$v.Driver}}" required></label>
+    <label>ทะเบียนรถ<input name="plate" value="{{$v.Plate}}"></label>
+    <label>เบอร์โทร<input name="phone" value="{{$v.Phone}}"></label>
+    <label>จำนวนที่นั่ง<input name="seats" type="number" min="0" value="{{if $v.Seats}}{{$v.Seats}}{{end}}"></label>
+    <label>สถานะรถ
+      <select name="status">{{range .Data.Statuses}}<option {{if eq . $v.Status}}selected{{end}}>{{.}}</option>{{end}}</select>
+    </label>
+    <label class="span2">โซนที่พัก<input name="zone" value="{{$v.Zone}}"></label>
+    <label class="span2">หมายเหตุ<input name="note" value="{{$v.Note}}"></label>
+    <label>วันที่เริ่มวิ่ง<input name="start_date" type="date" value="{{$v.StartDate.ISO}}"></label>
+    <span></span>
+    <label>วันเริ่มลา<input name="leave_start" type="date" value="{{$v.LeaveStart.ISO}}"></label>
+    <label>วันสิ้นสุดลา<input name="leave_end" type="date" value="{{$v.LeaveEnd.ISO}}"></label>
+  </div>
+  <p class="muted">คนขับลา: กรอกวันเริ่มลาและวันสิ้นสุดลา (สถานะรถยังเป็น "ใช้งานได้" ได้) — ระบบจะตัดออกจากคิวช่วงที่ลา และไม่นับเป็นวันให้บริการ</p>
+  <div class="actions">
+    <button class="primary">บันทึก</button>
+    <a class="btn" href="/vans">ยกเลิก</a>
+  </div>
+</form>
+{{with .Data.Row}}
+<section class="panel">
+  <h2>ข้อมูลคำนวณ ณ วันที่ {{$.R.Date}}</h2>
+  <dl class="kv">
+    <dt>สถานะวันนี้</dt><dd><span class="tag {{statusClass .TodayStatus}}">{{.TodayStatus}}</span></dd>
+    <dt>คำแนะนำวันนี้</dt><dd>{{.Advice}} (ลำดับคิว {{.Rank}})</dd>
+    <dt>เที่ยววิ่งเดือนนี้ (ถึงเมื่อวาน)</dt><dd>{{.MonthTrips}}</dd>
+    <dt>เที่ยววิ่ง 7 วันล่าสุด</dt><dd>{{.WeekTrips}}</dd>
+    <dt>เที่ยววิ่งสะสมทั้งหมด</dt><dd>{{.TotalTrips}}</dd>
+    <dt>วิ่งล่าสุดวันที่</dt><dd>{{if .LastRun}}{{.LastRun}}{{else}}ยังไม่เคยวิ่ง{{end}}</dd>
+    <dt>วันอ้างอิงคิว</dt><dd>{{.QueueRef}}</dd>
+    <dt>วันให้บริการเดือนนี้</dt><dd>{{.ServiceDays}}</dd>
+    <dt>อัตราเฉลี่ยเที่ยว/วัน</dt><dd>{{f2 .Rate}}</dd>
+  </dl>
+  <p><a href="/logs?date=all">ดูบันทึกการวิ่งทั้งหมด</a></p>
+  <form method="post" action="/vans/{{.ID}}/delete" onsubmit="return confirm('ลบ {{.Code}} ออกจากรายชื่อ? (บันทึกการวิ่งของรถคันนี้ยังอยู่)')">
+    <button class="danger">ลบรถตู้คันนี้</button>
+  </form>
+</section>
+{{end}}
+</div>
+{{end}}

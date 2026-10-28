@@ -1,0 +1,21 @@
+{{define "content"}}{{$r := .R}}
+<form class="panel form narrow" method="post" action="/settings">
+  <h2>ตั้งค่าระบบ</h2>
+  <div class="grid2">
+    <label>วันที่ต้องการดูข้อมูล (วันที่จะจัดรถ)<input type="date" name="date" value="{{$r.Date.ISO}}" required></label>
+    <label>จำนวนรถตู้ที่ต้องการใช้งานต่อวัน<input type="number" name="needed" min="0" value="{{$r.Needed}}" required></label>
+  </div>
+  <div class="actions"><button class="primary">บันทึก</button></div>
+</form>
+<section class="panel narrow">
+  <h2>ค่าที่ระบบคำนวณ</h2>
+  <dl class="kv">
+    <dt>จำนวนรถตู้ทั้งหมดในระบบ</dt><dd>{{$r.TotalVans}}</dd>
+    <dt>เดือน/ปี ที่กำลังดูข้อมูล</dt><dd>{{$r.Date.Time.Format "1/2006"}}</dd>
+    <dt>วันแรกของเดือน</dt><dd>{{$r.MonthStart}}</dd>
+    <dt>จำนวนรถที่พร้อมวิ่งในวันนี้</dt><dd>{{$r.ReadyCount}}</dd>
+    <dt>จำนวนรถที่ระบบแนะนำให้วิ่ง</dt><dd>{{$r.Recommended}}</dd>
+    <dt>รถคันสุดท้ายที่วิ่งรอบล่าสุด (หมายเลข)</dt><dd>{{$r.LastCarNum}} <small class="muted">คิววันนี้เริ่มคันถัดไป</small></dd>
+  </dl>
+</section>
+{{end}}

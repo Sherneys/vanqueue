@@ -1,0 +1,65 @@
+{{define "content"}}{{$r := .R}}{{$logged := .Data.Logged}}
+<p class="muted">{{thaiDate $r.Date}} ให้วิ่ง <b>{{$r.Recommended}}</b> คัน จากรถพร้อมวิ่ง {{$r.ReadyCount}} คัน
+  คิววนตามหมายเลขรถ ต่อจากคันที่ {{$r.LastCarNum}} ที่วิ่งล่าสุด</p>
+
+<form method="post" action="/queue/record" id="recordForm">
+<div class="toolbar">
+  <input type="search" id="q" placeholder="ค้นหา รหัส / ชื่อ / ทะเบียน / โซน" oninput="filterRows()">
+  <label><input type="checkbox" id="onlyRun" onchange="filterRows()"> แสดงเฉพาะ "ควรวิ่ง"</label>
+  <span class="grow"></span>
+  <button type="button" onclick="tick('run')">เลือกรถ "ควรวิ่ง"</button>
+  <button type="button" onclick="tick('none')">ล้างที่เลือก</button>
+  <input type="text" name="destination" placeholder="สถานที่ไป (ไม่บังคับ)">
+  <button class="primary" onclick="return confirmRecord()">บันทึกว่าวิ่งแล้ว (<span id="cnt">0</span> คัน)</button>
+</div>
+<div class="legend">
+  <span><i class="swatch"></i>ควรวิ่งวันนี้</span>
+  <span><i class="done">✓</i>บันทึกว่าวิ่งวันนี้แล้ว</span>
+  <span><i class="box"></i>ยังไม่ได้บันทึก ติ๊กแล้วกดบันทึกได้</span>
+</div>
+<div class="table-wrap">
+<table id="tbl">
+<thead><tr>
+  <th></th><th>ลำดับคิว</th><th>รหัสรถตู้</th><th>ชื่อคนขับ</th><th>ทะเบียนรถ</th><th>ที่นั่ง</th><th>โซนที่พัก</th>
+  <th>วิ่งล่าสุด</th><th>วันอ้างอิงคิว</th><th>รอมาแล้ว (วัน)</th><th>เที่ยววิ่ง 7 วัน</th><th>เที่ยววิ่ง เดือนนี้</th><th>อัตราเฉลี่ย เที่ยว/วัน</th><th>คำแนะนำ</th>
+</tr></thead>
+<tbody>
+{{range $r.Queue}}
+<tr class="{{if .ShouldRun}}run{{else if not .Ready}}dim{{end}}" data-run="{{.ShouldRun}}">
+  <td>{{if index $logged .Code}}<span class="done" title="บันทึกว่าวิ่งวันนี้แล้ว">✓</span>{{else if .Ready}}<input type="checkbox" name="code" value="{{.Code}}" class="pick" {{if .ShouldRun}}data-run="1"{{end}} onchange="count()">{{end}}</td>
+  <td class="num">{{.Rank}}</td>
+  <td><a href="/vans/{{.ID}}"><b>{{.Code}}</b></a></td>
+  <td>{{.Driver}}</td><td>{{.Plate}}</td><td class="num">{{.Seats}}</td><td class="wrap">{{.Zone}}</td>
+  <td>{{if .LastRun}}{{.LastRun}}{{else}}ยังไม่เคยวิ่ง{{end}}</td>
+  <td>{{.QueueRef}}</td>
+  <td class="num">{{if .HasWait}}{{.WaitDays}}{{end}}</td>
+  <td class="num">{{.WeekTrips}}</td><td class="num">{{.MonthTrips}}</td><td class="num">{{f2 .Rate}}</td>
+  <td><span class="tag {{if .ShouldRun}}ok{{else if .Ready}}{{else}}{{statusClass .TodayStatus}}{{end}}">{{.Advice}}</span></td>
+</tr>
+{{end}}
+</tbody>
+</table>
+</div>
+</form>
+<script>
+function filterRows() {
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  const only = document.getElementById('onlyRun').checked;
+  for (const tr of document.querySelectorAll('#tbl tbody tr')) {
+    const show = (!q || tr.textContent.toLowerCase().includes(q)) && (!only || tr.dataset.run === 'true');
+    tr.style.display = show ? '' : 'none';
+  }
+}
+function tick(mode) {
+  for (const cb of document.querySelectorAll('.pick')) cb.checked = mode === 'run' && cb.dataset.run === '1';
+  count();
+}
+function count() { document.getElementById('cnt').textContent = document.querySelectorAll('.pick:checked').length; }
+function confirmRecord() {
+  const n = document.querySelectorAll('.pick:checked').length;
+  if (!n) { alert('ยังไม่ได้เลือกรถ'); return false; }
+  return confirm('บันทึกว่ารถ ' + n + ' คันวิ่งแล้ว วันที่ {{$r.Date.String}} ?');
+}
+count();
+</script>
+{{end}}

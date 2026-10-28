@@ -1,0 +1,58 @@
+{{define "head"}}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600&family=Mitr:wght@400;500&family=Nunito:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+<script type="importmap">
+{"imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+  // Load the 3D scene only on pages that show one.
+  if (document.querySelector('[data-van3d]')) import('/static/van3d.js');
+</script>
+{{end}}
+
+{{define "layout"}}<!doctype html>
+<html lang="th">
+<head>
+{{template "head"}}
+<title>{{.Title}} · ระบบจัดสรรรถตู้</title>
+</head>
+<body>
+<header class="top">
+  <div class="brand">ระบบจัดสรรรถตู้</div>
+  <nav>
+    <a href="/" {{if eq .Nav "dashboard"}}class="on"{{end}}>ภาพรวม</a>
+    <a href="/queue" {{if eq .Nav "queue"}}class="on"{{end}}>คิววันนี้</a>
+    <a href="/logs" {{if eq .Nav "logs"}}class="on"{{end}}>บันทึกการวิ่ง</a>
+    <a href="/vans" {{if eq .Nav "vans"}}class="on"{{end}}>รายชื่อรถตู้</a>
+    <a href="/settings" {{if eq .Nav "settings"}}class="on"{{end}}>ตั้งค่า</a>
+    <a href="/guide" {{if eq .Nav "guide"}}class="on"{{end}}>วิธีใช้</a>
+  </nav>
+  <form class="datebar" method="post" action="/date">
+    <input type="hidden" name="back" value="{{.Path}}">
+    <span class="muted">วันที่จัดรถ</span>
+    <button name="move" value="prev" title="วันก่อนหน้า" aria-label="วันก่อนหน้า">‹</button>
+    <input type="date" name="date" value="{{.R.Date.ISO}}" onchange="this.form.submit()" aria-label="วันที่จัดรถ">
+    <button name="move" value="next" title="วันถัดไป" aria-label="วันถัดไป">›</button>
+    <button name="move" value="today">วันนี้</button>
+  </form>
+  <form class="userbar" method="post" action="/logout">
+    <span class="muted" title="ผู้ใช้ที่เข้าสู่ระบบ">{{.User}}</span>
+    <button title="{{.User}}">ออกจากระบบ</button>
+  </form>
+</header>
+<main>
+  {{if ne .Nav "dashboard"}}<h1>{{.Title}}</h1>{{end}}
+  {{with .Msg}}<div class="flash {{if isWarn .}}warn{{end}}">{{.}}</div>{{end}}
+  {{with .Err}}<div class="flash warn">{{.}}</div>{{end}}
+  {{with .R.Warning}}<div class="flash warn">{{.}}</div>{{end}}
+  {{template "content" .}}
+</main>
+</body>
+</html>{{end}}

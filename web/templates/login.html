@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="th">
+<head>
+{{template "head"}}
+<title>เข้าสู่ระบบ · ระบบจัดสรรรถตู้</title>
+</head>
+<body class="login-body">
+<div class="login-card">
+  <div class="hero-art" data-van3d aria-hidden="true"></div>
+  <form class="form login" method="post" action="/login">
+    <h1>เข้าสู่ระบบ</h1>
+    {{with .Err}}<div class="flash warn">{{.}}</div>{{end}}
+    <input type="hidden" name="next" value="{{.Next}}">
+    <label>อีเมล<input type="email" name="email" value="{{.Email}}" autocomplete="username" required autofocus></label>
+    <label>รหัสผ่าน<input type="password" name="password" autocomplete="current-password" required></label>
+    <button class="primary">เข้าสู่ระบบ</button>
+    <p class="muted"><small>ยังไม่มีบัญชี ติดต่อผู้ดูแลระบบให้เพิ่มผู้ใช้</small></p>
+  </form>
+</div>
+</body>
+</html>

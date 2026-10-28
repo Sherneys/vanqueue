@@ -1,0 +1,16 @@
+{{define "content"}}{{$l := .Data.Log}}
+<form class="panel form narrow" method="post" action="/logs/{{$l.ID}}">
+  <div class="grid2">
+    <label>วันที่ *<input type="date" name="date" value="{{$l.Date.ISO}}" required></label>
+    <label>รหัสรถตู้ *<input name="code" value="{{$l.Code}}" list="vanCodes" required></label>
+    <label>สถานะ<select name="status">{{range .Data.Statuses}}<option {{if eq . $l.Status}}selected{{end}}>{{.}}</option>{{end}}</select></label>
+    <label>สถานที่ไป (ปลายทาง)<input name="destination" value="{{$l.Destination}}"></label>
+    <label class="span2">หมายเหตุ<input name="note" value="{{$l.Note}}"></label>
+  </div>
+  <datalist id="vanCodes">{{range .R.Vans}}<option value="{{.Code}}">{{.Driver}}</option>{{end}}</datalist>
+  <div class="actions">
+    <button class="primary">บันทึก</button>
+    <a class="btn" href="/logs?date={{$l.Date.ISO}}">ยกเลิก</a>
+  </div>
+</form>
+{{end}}

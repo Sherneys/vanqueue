@@ -1,0 +1,51 @@
+{{define "content"}}{{$r := .R}}
+<div class="toolbar">
+  <input type="search" id="q" placeholder="ค้นหา รหัส / ชื่อ / ทะเบียน / โซน / เบอร์โทร" oninput="filterRows()">
+  <select id="st" onchange="filterRows()">
+    <option value="">ทุกสถานะวันนี้</option>
+    <option>พร้อมวิ่ง</option><option>ลา</option><option>ยังไม่ถึงวันเริ่มวิ่ง</option>
+    <option>ซ่อมบำรุง</option><option>ลาหยุด</option><option>เลิกวิ่ง</option><option>พักงาน</option><option>รอคิว</option>
+  </select>
+  <span class="grow"></span>
+  <a class="btn" href="/export/vans.csv">ดาวน์โหลด CSV</a>
+  <a class="btn primary" href="/vans/new">+ เพิ่มรถตู้</a>
+</div>
+<p class="muted">คลิกรหัสรถเพื่อแก้ไข คอลัมน์พื้นเทาระบบคำนวณจากบันทึกการวิ่ง ณ วันที่ {{$r.Date}}</p>
+<div class="table-wrap">
+<table id="tbl">
+<thead><tr>
+  <th>ลำดับ</th><th>รหัสรถตู้</th><th>ชื่อคนขับ</th><th>ทะเบียนรถ</th><th>เบอร์โทร</th><th>ที่นั่ง</th><th>หมายเหตุ</th><th>โซนที่พัก</th>
+  <th>สถานะรถ</th><th>วันที่เริ่มวิ่ง</th><th>วันเริ่มลา</th><th>วันสิ้นสุดลา</th>
+  <th class="calc">เที่ยววิ่งเดือนนี้ (ถึงเมื่อวาน)</th><th class="calc">เที่ยววิ่ง 7 วัน</th><th class="calc">เที่ยววิ่งสะสม</th>
+  <th class="calc">วิ่งล่าสุด</th><th class="calc">วันอ้างอิงคิว</th><th class="calc">วันให้บริการ เดือนนี้</th><th class="calc">อัตราเฉลี่ย เที่ยว/วัน</th>
+  <th class="calc">สถานะวันนี้</th><th class="calc">ลำดับคิว</th><th class="calc">คำแนะนำวันนี้</th>
+</tr></thead>
+<tbody>
+{{range $i, $v := $r.Vans}}
+<tr data-st="{{.TodayStatus}}">
+  <td class="num">{{add1 $i}}</td>
+  <td><a href="/vans/{{.ID}}"><b>{{.Code}}</b></a></td>
+  <td>{{.Driver}}</td><td>{{.Plate}}</td><td>{{.Phone}}</td><td class="num">{{.Seats}}</td>
+  <td class="wrap">{{.Note}}</td><td class="wrap">{{.Zone}}</td><td>{{.Status}}</td>
+  <td>{{.StartDate}}</td><td>{{.LeaveStart}}</td><td>{{.LeaveEnd}}</td>
+  <td class="num calc">{{.MonthTrips}}</td><td class="num calc">{{.WeekTrips}}</td><td class="num calc">{{.TotalTrips}}</td>
+  <td class="calc">{{.LastRun}}</td><td class="calc">{{.QueueRef}}</td><td class="num calc">{{.ServiceDays}}</td><td class="num calc">{{f2 .Rate}}</td>
+  <td class="calc"><span class="tag {{statusClass .TodayStatus}}">{{.TodayStatus}}</span></td>
+  <td class="num calc">{{.Rank}}</td>
+  <td class="calc"><span class="tag {{if .ShouldRun}}ok{{end}}">{{.Advice}}</span></td>
+</tr>
+{{end}}
+</tbody>
+</table>
+</div>
+<script>
+function filterRows() {
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  const st = document.getElementById('st').value;
+  for (const tr of document.querySelectorAll('#tbl tbody tr')) {
+    const show = (!q || tr.textContent.toLowerCase().includes(q)) && (!st || tr.dataset.st === st);
+    tr.style.display = show ? '' : 'none';
+  }
+}
+</script>
+{{end}}

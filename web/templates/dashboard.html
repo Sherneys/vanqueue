@@ -1,0 +1,70 @@
+{{define "content"}}{{$r := .R}}
+<section class="hero">
+  <div>
+    <p class="day">{{thaiDate $r.Date}}</p>
+    <h1>วันนี้ให้วิ่ง {{$r.Recommended}} คัน</h1>
+    <p class="sub">
+      จากรถพร้อมวิ่ง <b>{{$r.ReadyCount}}</b> คัน
+      {{with .Data.Next}}คิวเริ่มที่ <b>{{.Code}}</b> {{.Driver}}{{end}}
+    </p>
+    <div class="actions">
+      <a class="btn primary" href="/queue">ดูคิววันนี้</a>
+      <a class="btn" href="/logs">บันทึกการวิ่ง</a>
+    </div>
+  </div>
+  <div class="hero-art" data-van3d aria-hidden="true"></div>
+</section>
+
+<div class="stats">
+  <section class="panel">
+    <h2>วันนี้</h2>
+    <dl class="stat-list">
+      <div class="good"><dt>รถพร้อมวิ่ง</dt><dd>{{$r.ReadyCount}}</dd></div>
+      <div><dt>พร้อมวิ่งแต่ยังไม่ถึงคิว</dt><dd>{{$r.ReadySkip}}</dd></div>
+      <div><dt>ซ่อมบำรุง</dt><dd>{{$r.Maintenance}}</dd></div>
+      <div><dt>ลา / ยังไม่เริ่มงาน / อื่นๆ</dt><dd>{{$r.OtherUnavailable}}</dd></div>
+      <div><dt>รอคิวนานที่สุด<small>รถพร้อมวิ่ง</small></dt><dd>{{$r.LongestWait}} วัน</dd></div>
+    </dl>
+  </section>
+  <section class="panel">
+    <h2>เดือน {{thaiMonth $r.Date}}</h2>
+    <dl class="stat-list">
+      <div><dt>รถตู้ทั้งหมด</dt><dd>{{$r.TotalVans}}</dd></div>
+      <div><dt>เที่ยววิ่งรวม<small>นับถึงเมื่อวาน</small></dt><dd>{{$r.MonthTripsTotal}}</dd></div>
+      <div><dt>เฉลี่ยเที่ยวต่อคัน</dt><dd>{{f1 $r.AvgTripsPerVan}}</dd></div>
+      <div><dt>ส่วนต่างอัตราเฉลี่ย มาก-น้อย<small>ยิ่งน้อยยิ่งสมดุล</small></dt><dd>{{f2 $r.RateSpread}}</dd></div>
+      <div><dt>รถพร้อมวิ่งที่ยังไม่ได้วิ่งเลย</dt><dd>{{$r.ReadyNoTrips}}</dd></div>
+      <a href="/logs?date=all&problems=1" class="{{if $r.ProblemRows}}bad{{end}}"><dt>แถวบันทึกที่ต้องแก้</dt><dd>{{$r.ProblemRows}}</dd></a>
+    </dl>
+  </section>
+</div>
+
+<div class="split">
+  <section class="panel">
+    <h2>5 คันแรกในคิว</h2>
+    <table><thead><tr><th>ลำดับ</th><th>รหัสรถ</th><th>คนขับ</th><th>วิ่งล่าสุด</th></tr></thead><tbody>
+    {{range .Data.First}}<tr><td class="num">{{.Rank}}</td><td><b>{{.Code}}</b></td><td>{{.Driver}}</td><td>{{if .LastRun}}{{.LastRun}}{{else}}ยังไม่เคยวิ่ง{{end}}</td></tr>{{end}}
+    </tbody></table>
+  </section>
+  <section class="panel">
+    <h2>5 คันท้ายคิว <small class="muted">เพิ่งวิ่งไป</small></h2>
+    <table><thead><tr><th>ลำดับ</th><th>รหัสรถ</th><th>คนขับ</th><th>วิ่งล่าสุด</th></tr></thead><tbody>
+    {{range .Data.Last}}<tr><td class="num">{{.Rank}}</td><td><b>{{.Code}}</b></td><td>{{.Driver}}</td><td>{{if .LastRun}}{{.LastRun}}{{else}}ยังไม่เคยวิ่ง{{end}}</td></tr>{{end}}
+    </tbody></table>
+  </section>
+</div>
+
+<section class="panel">
+  <h2>เที่ยววิ่งต่อวัน เดือน {{thaiMonth $r.Date}}</h2>
+  {{$max := .Data.ChartMax}}
+  <div class="chart">
+    {{range $r.Daily}}
+    <div class="bar-col" title="{{.Day}}: {{.Count}} เที่ยว">
+      <span class="bar-val">{{if .Count}}{{.Count}}{{end}}</span>
+      <div class="bar {{if eq .Day $r.Date}}today{{end}}" style="height: {{barHeight .Count $max}}px"></div>
+      <span class="bar-lbl">{{dayNum .Day}}</span>
+    </div>
+    {{end}}
+  </div>
+</section>
+{{end}}
